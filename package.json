@@ -2,6 +2,7 @@
   "name": "vite-plugin-auto-preload",
   "version": "0.1.0",
   "description": "Vite plugin for adding preload resource hints in HTML",
+  "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
