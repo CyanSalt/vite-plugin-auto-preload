@@ -14,52 +14,61 @@ const autoPreload = (): Plugin => {
       const preloadURLs = new Set(preloadTags.map(node => node.getAttribute('href')!))
       const modulePreloadURLs = new Set(modulePreloadTags.map(node => node.getAttribute('href')!))
 
-      const missingModulePreloadURLs = scripts
+      const missingModulePreloadTags = scripts
         .filter(node => node.getAttribute('type') === 'module')
-        .map(node => node.getAttribute('src')!)
-        .filter(value => !modulePreloadURLs.has(value))
+        .filter(node => {
+          const url = node.getAttribute('src')
+          return url && !modulePreloadURLs.has(url)
+        })
 
-      const missingScriptPreloadURLs = scripts
+      const missingScriptPreloadTags = scripts
         .filter(node => node.getAttribute('type') !== 'module')
-        .map(node => node.getAttribute('src')!)
-        .filter(value => !preloadURLs.has(value))
+        .filter(node => {
+          const url = node.getAttribute('src')
+          return url && !preloadURLs.has(url)
+        })
 
-      const missingStylesheetPreloadURLs = stylesheets
-        .map(node => node.getAttribute('href')!)
-        .filter(value => !preloadURLs.has(value))
+      const missingStylesheetPreloadTags = stylesheets
+        .filter(node => {
+          const url = node.getAttribute('href')
+          return url && !preloadURLs.has(url)
+        })
 
       return {
         html,
         tags: [
-          ...missingModulePreloadURLs.map(url => {
+          ...missingModulePreloadTags.map(node => {
+            const crossorigin = node.getAttribute('crossorigin')
             return {
               tag: 'link',
               attrs: {
                 rel: 'modulepreload',
-                href: url,
-                crossorigin: true,
+                href: node.getAttribute('src'),
+                ...(crossorigin !== undefined ? { crossorigin } : {}),
               },
             }
           }),
-          ...missingScriptPreloadURLs.map(url => {
+          ...missingScriptPreloadTags.map(node => {
+            const crossorigin = node.getAttribute('crossorigin')
             return {
               tag: 'link',
               attrs: {
                 rel: 'preload',
-                href: url,
+                href: node.getAttribute('src'),
                 as: 'script',
-                crossorigin: true,
+                ...(crossorigin !== undefined ? { crossorigin } : {}),
               },
             }
           }),
-          ...missingStylesheetPreloadURLs.map(url => {
+          ...missingStylesheetPreloadTags.map(node => {
+            const crossorigin = node.getAttribute('crossorigin')
             return {
               tag: 'link',
               attrs: {
                 rel: 'preload',
-                href: url,
+                href: node.getAttribute('href'),
                 as: 'style',
-                crossorigin: true,
+                ...(crossorigin !== undefined ? { crossorigin } : {}),
               },
             }
           }),
